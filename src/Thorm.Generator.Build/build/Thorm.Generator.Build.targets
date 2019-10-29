@@ -1,0 +1,139 @@
+<Project TreatAsLocalProperty="
+         Thorm_ArgsFile;
+         Thorm_CodeGenDirectory;
+         Thorm_GeneratorEnabled;
+         Thorm_CoreAssembly;
+         Thorm_DotNetHost;
+         Thorm_GeneratorAssembly;
+         Thorm_MSBuildIsCore;
+         Thorm_OutputFileName;
+         Thorm_TargetIsCore;
+         Thorm_TaskAssembly;
+         Thorm_GeneratorTargetFramework;">
+
+  <PropertyGroup>
+    <Thorm_GeneratorTargetFramework>netcoreapp2.2</Thorm_GeneratorTargetFramework>
+    <Thorm_DotNetHost Condition="'$(DotNetFromPath)' == 'true'">dotnet</Thorm_DotNetHost>
+    <Thorm_CoreAssembly Condition="'$(ThormCodeGenCoreAssembly)' != ''">$(ThormCodeGenCoreAssembly)</Thorm_CoreAssembly>
+    <Thorm_CoreAssembly Condition="'$(Thorm_CoreAssembly)' == ''">$(MSBuildThisFileDirectory)..\tasks\$(Thorm_GeneratorTargetFramework)\Thorm.Generator.Build.dll</Thorm_CoreAssembly>
+
+    <!-- Specify the assembly containing the MSBuild tasks. -->
+    <Thorm_MSBuildIsCore Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(OS)' != 'Windows_NT'">true</Thorm_MSBuildIsCore>
+    <Thorm_TaskAssembly Condition="'$(ThormCodeGenTasksAssembly)' != ''">$(ThormCodeGenTasksAssembly)</Thorm_TaskAssembly>
+    <Thorm_TaskAssembly Condition="'$(Thorm_TaskAssembly)' == '' and '$(Thorm_MSBuildIsCore)' == 'true'">$(MSBuildThisFileDirectory)..\tasks\$(Thorm_GeneratorTargetFramework)\Thorm.Generator.Build.Tasks.dll</Thorm_TaskAssembly>
+
+    <!-- When the MSBuild host is full-framework, we defer to PATH for dotnet -->
+    <Thorm_DotNetHost Condition="'$(Thorm_MSBuildIsCore)' != 'true'">dotnet</Thorm_DotNetHost>
+    <Thorm_DotNetHost Condition="'$(DotNetHost)' != ''">$(DotNetHost)</Thorm_DotNetHost>
+
+    <!-- Specify the assembly containing the code generator. -->
+    <Thorm_GeneratorAssembly Condition="'$(Thorm_GeneratorAssembly)' == ''">$(Thorm_CoreAssembly)</Thorm_GeneratorAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ThormCodeGenLogLevel Condition="'$(ThormCodeGenLogLevel)' == ''">Warning</ThormCodeGenLogLevel>
+    <Thorm_CodeGenDirectory Condition="'$([System.IO.Path]::IsPathRooted($(IntermediateOutputPath)))' == 'true'">$(IntermediateOutputPath)</Thorm_CodeGenDirectory>
+    <Thorm_CodeGenDirectory Condition="'$(Thorm_CodeGenDirectory)' == ''">$(ProjectDir)$(IntermediateOutputPath)</Thorm_CodeGenDirectory>
+    <Thorm_OutputFileName>$(Thorm_CodeGenDirectory)$(TargetName).Thorm.g.cs</Thorm_OutputFileName>
+    <Thorm_GeneratorEnabled Condition=" '$(DesignTimeBuild)' != 'true'">true</Thorm_GeneratorEnabled>
+    <Thorm_ArgsFile>$(Thorm_CodeGenDirectory)$(TargetName).Thorm.g.args.txt</Thorm_ArgsFile>
+    <ThormGenerateCodeDependsOn>$(ThormGenerateCodeDependsOn);ResolveReferences;ThormGenerateInputCache</ThormGenerateCodeDependsOn>
+  </PropertyGroup>
+
+  <UsingTask
+    TaskName="Thorm.Generator.Build.Tasks.GetDotNetHost"
+    AssemblyFile="$(Thorm_TaskAssembly)"
+    Condition="'$(Thorm_GeneratorEnabled)' == 'true' and '$(Thorm_DotNetHost)' == '' and '$(Thorm_MSBuildIsCore)' == 'true'" />
+  
+  <!--
+    Input to the code generator should not include its output.
+  -->
+  <ItemGroup>
+    <Thorm_CodeGenInputs Include="@(Compile);@(ReferencePath)" />
+    <Thorm_CodeGenInputs Remove="$(Thorm_OutputFileName)" />
+  </ItemGroup>
+
+  <!-- Properties used to support correct, incremental builds. -->
+  <PropertyGroup>
+    <!--
+      Since the Thorm code generator also affects the state of @(Compile) and hence the compile inputs file,
+      we maintain a separate cache with Thorm' own files removed. Otherwise there would be a circular dependency
+      whereby the cache updates and triggers the code generator, which triggers a cache update.
+    -->
+    <Thorm_CodeGenInputCache>$(IntermediateOutputPath)$(MSBuildProjectFile).ThormCodeGenInputs.cache</Thorm_CodeGenInputCache>
+  </PropertyGroup>
+
+  <!--
+    Update the file which captures the total set of all inputs to the code generator.
+    This is based on the _GenerateCompileDependencyCache target from the .NET project system.
+  -->
+  <Target Name="ThormGenerateInputCache"
+          DependsOnTargets="ResolveAssemblyReferences"
+          BeforeTargets="ThormGenerateCode">
+
+    <Hash ItemsToHash="@(Thorm_CodeGenInputs)">
+      <Output TaskParameter="HashResult" PropertyName="Thorm_UpdatedInputCacheContents" />
+    </Hash>
+
+    <WriteLinesToFile
+      Overwrite="true"
+      File="$(Thorm_CodeGenInputCache)"
+      Lines="$(Thorm_UpdatedInputCacheContents)"
+      WriteOnlyWhenDifferent="True" />
+
+    <ItemGroup>
+      <FileWrites Include="$(Thorm_CodeGenInputCache)" />
+    </ItemGroup>
+    
+  </Target>
+
+  <Target Name="ThormGenerateCode"
+          DependsOnTargets="$(ThormGenerateCodeDependsOn)"
+          AfterTargets="ThormGenerateInputCache"
+          BeforeTargets="AssignTargetPaths"
+          Condition="'$(Thorm_GeneratorEnabled)' == 'true'"
+          Inputs="@(Thorm_CodeGenInputs);$(Thorm_CodeGenInputCache)"
+          Outputs="$(Thorm_OutputFileName)">
+
+    <ItemGroup>
+      <Thorm_CodeGenArgs Include="WaitForDebugger" Condition="'$(ThormCodeGenWaitForDebugger)' != ''" />
+      <Thorm_CodeGenArgs Include="LogLevel:$(ThormCodeGenLogLevel)" />
+      <Thorm_CodeGenArgs Include="DebuggerStepThrough:true" Condition="'$(ThormCodeGenDebuggerStepThrough)' == 'true'" />
+      <Thorm_CodeGenArgs Include="ProjectPath:$(MSBuildProjectFullPath)"/>
+      <Thorm_CodeGenArgs Include="ProjectGuid:$(ProjectGuid)"/>
+      <Thorm_CodeGenArgs Include="AssemblyName:$(AssemblyName)"/>
+      <Thorm_CodeGenArgs Include="OutputType:$(OutputType)"/>
+      <Thorm_CodeGenArgs Include="TargetPath:$(TargetPath)"/>
+      <Thorm_CodeGenArgs Include="CodeGenOutputFile:$(Thorm_OutputFileName)"/>
+      <Thorm_CodeGenArgs Include="@(Compile -> 'Compile:%(FullPath)')"/>
+      <Thorm_CodeGenArgs Include="@(ReferencePath -> 'Reference:%(FullPath)')"/>
+      <Thorm_CodeGenArgs Include="DefineConstants:$(DefineConstants.Replace(';',','))"/>
+    </ItemGroup>
+
+    <Message Text="[Thorm.Generator] - CodeGen executable=$(Thorm_GeneratorAssembly)" Importance="Low" />
+    <Message Text="[Thorm.Generator] - CodeGen arguments=@(Thorm_CodeGenArgs -> '%(Identity)')" Importance="Low"/>
+    <Message Text="[Thorm.Generator] - CodeGen arguments file=$(Thorm_ArgsFile)" Importance="Low"/>
+    <WriteLinesToFile Overwrite="true" File="$(Thorm_ArgsFile)" Lines="@(Thorm_CodeGenArgs)"/>
+
+    <Thorm.Generator.Build.Tasks.GetDotNetHost Condition="'$(Thorm_DotNetHost)' == '' and '$(Thorm_MSBuildIsCore)' == 'true' ">
+      <Output TaskParameter="DotNetHost" PropertyName="Thorm_DotNetHost" />
+    </Thorm.Generator.Build.Tasks.GetDotNetHost>
+
+    <!-- Use dotnet to execute the process. -->
+    <Exec Command="&quot;$(Thorm_DotNetHost)&quot; &quot;$(Thorm_GeneratorAssembly)&quot; SourceToSource &quot;$(Thorm_ArgsFile)&quot;" Outputs="$(Thorm_OutputFileName)" />
+
+    <ItemGroup>
+      <Compile Include="$(Thorm_OutputFileName)" Condition="Exists('$(Thorm_OutputFileName)')" />
+      <FileWrites Include="$(Thorm_OutputFileName)" Condition="Exists('$(Thorm_OutputFileName)')"/>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ThormIncludeCodegenOutputDuringDesignTimeBuild"
+          BeforeTargets="AssignTargetPaths"
+          Condition="'$(Thorm_GeneratorEnabled)' != 'true' and Exists('$(Thorm_OutputFileName)')">
+    <ItemGroup>
+      <Compile Include="$(Thorm_OutputFileName)"/>
+      <FileWrites Include="$(Thorm_OutputFileName)"/>
+    </ItemGroup>
+  </Target>
+</Project>
