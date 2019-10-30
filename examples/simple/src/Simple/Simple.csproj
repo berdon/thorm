@@ -6,11 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Thorm/Thorm.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Thorm.Generator.Build" Version="0.0.1-dev2019.10.29T132634" />
+    <ProjectReference Include="../../../../src/Thorm/Thorm.csproj" />
   </ItemGroup>
 
 </Project>

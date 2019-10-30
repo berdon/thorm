@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B620B1B1-EFC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thorm", "src\Thorm\Thorm.csproj", "{14373417-3EFA-4851-9DD5-EE02FD8ED2D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thorm.Abstractions", "src\Thorm.Abstractions\Thorm.Abstractions.csproj", "{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,8 +34,21 @@ Global
 		{14373417-3EFA-4851-9DD5-EE02FD8ED2D0}.Release|x64.Build.0 = Release|Any CPU
 		{14373417-3EFA-4851-9DD5-EE02FD8ED2D0}.Release|x86.ActiveCfg = Release|Any CPU
 		{14373417-3EFA-4851-9DD5-EE02FD8ED2D0}.Release|x86.Build.0 = Release|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Debug|x64.Build.0 = Debug|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Debug|x86.Build.0 = Debug|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Release|x64.ActiveCfg = Release|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Release|x64.Build.0 = Release|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Release|x86.ActiveCfg = Release|Any CPU
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{14373417-3EFA-4851-9DD5-EE02FD8ED2D0} = {B620B1B1-EFCC-445B-B2EE-FE12E6920F09}
+		{643CCA68-4D4D-4010-BF0E-B7C17ACC318A} = {B620B1B1-EFCC-445B-B2EE-FE12E6920F09}
 	EndGlobalSection
 EndGlobal
