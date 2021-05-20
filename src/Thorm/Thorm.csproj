@@ -1,4 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Timestamp>$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</Timestamp>
+  </PropertyGroup>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,16 +10,12 @@
     <PublishRoot>bin\$(Configuration)\publish\</PublishRoot>
     <PublishDir>$(PublishRoot)$(TargetFramework)</PublishDir>
     <VersionPrefix>0.0.1</VersionPrefix>
-    <VersionSuffix Condition="$(Configuration) == 'Debug'">dev$(Timestamp)</VersionSuffix>
+    <VersionSuffix Condition="$(Configuration) == 'Debug'">dev-$(Timestamp)</VersionSuffix>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Thorm</PackageId>
     <Title>Thorm ORM</Title>
     <Description>.NET Generated ORM</Description>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <Timestamp>$([System.DateTime]::Now.ToString("yyyy.MM.dd\THHmmss"))</Timestamp>
   </PropertyGroup>
 </Project>

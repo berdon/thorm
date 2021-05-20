@@ -1,15 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>Thorm.Generator.Build</PackageId>
     <Title>Thorm Code Generator</Title>
     <Description>Generates code at compile time for Thorm.</Description>
   </PropertyGroup>
-
   <PropertyGroup>
-    <Timestamp>$([System.DateTime]::Now.ToString("yyyy.MM.dd\THHmmss"))</Timestamp>
+    <Timestamp>$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</Timestamp>
   </PropertyGroup>
-
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -25,13 +22,11 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <DevelopmentDependency>true</DevelopmentDependency>
     <VersionPrefix>0.0.1</VersionPrefix>
-    <VersionSuffix>dev$(Timestamp)</VersionSuffix>
+    <VersionSuffix>dev-$(Timestamp)</VersionSuffix>
   </PropertyGroup>
-
   <ItemGroup>
-    <None Remove="build\Thorm.Generator.Build.targets" />
+    <None Remove="build\Thorm.Generator.Build.targets"/>
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="build\Thorm.Generator.Build.targets">
       <Pack>true</Pack>
@@ -44,33 +39,27 @@
       <Visible>true</Visible>
     </Content>
   </ItemGroup>
-
   <ItemGroup>
-    <!-- This must come after all other PackageReference elements -->
-    <PackageReference Update="@(PackageReference)" PrivateAssets="All" Publish="true" />
+    <PackageReference Update="@(PackageReference)" PrivateAssets="All" Publish="true"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0"/>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\Thorm.Generator\Thorm.Generator.csproj" PrivateAssets="all" Publish="true" />
-    <ProjectReference Include="..\Thorm.Generator.Build.Tasks\Thorm.Generator.Build.Tasks.csproj" PrivateAssets="all" Publish="true" />
+    <ProjectReference Include="..\Thorm.Generator\Thorm.Generator.csproj" PrivateAssets="all" Publish="true"/>
+    <ProjectReference Include="..\Thorm.Generator.Build.Tasks\Thorm.Generator.Build.Tasks.csproj" PrivateAssets="all" Publish="true"/>
   </ItemGroup>
-
   <Target Name="PostBuildPublish" AfterTargets="Build">
-    <!-- So that we can create a nuget package which includes all dependencies, we publish the build. -->
-    <!-- However, we cannot publish during the cross-targeting build, so we skip that. -->
-    <CallTarget Targets="Publish" Condition="'$(TargetFramework)' != '' and '$(DesignTimeBuild)' == ''" />
+    <CallTarget Targets="Publish" Condition="'$(TargetFramework)' != '' and '$(DesignTimeBuild)' == ''"/>
   </Target>
-  
   <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
-   <!-- 
-    The include needs to happen after output has been copied to build output folder
-    but before NuGet generates a nuspec. See https://github.com/NuGet/Home/issues/4704.
-   -->
     <ItemGroup>
-      <PublishedFiles Include="$(PublishRoot)**/*" Exclude="$(PublishRoot)**/$(AssemblyName).*;$(PublishRoot)*/refs/**/*" />
-      <PublishedFiles Include="$(PublishRoot)**/$(AssemblyName).Tasks.*" />
-      <PublishedFiles Include="$(PublishRoot)**/$(AssemblyName).deps.json" />
-      <PublishedFiles Include="$(PublishRoot)**/$(AssemblyName).*.config" Exclude="$(PublishRoot)**/$(AssemblyName).Tasks.*" />
+      <PublishedFiles Include="$(PublishRoot)**/*" Exclude="$(PublishRoot)**/$(AssemblyName).*;$(PublishRoot)*/refs/**/*"/>
+      <PublishedFiles Include="$(PublishRoot)**/$(AssemblyName).Tasks.*"/>
+      <PublishedFiles Include="$(PublishRoot)**/$(AssemblyName).deps.json"/>
+      <PublishedFiles Include="$(PublishRoot)**/$(AssemblyName).*.config" Exclude="$(PublishRoot)**/$(AssemblyName).Tasks.*"/>
       <_PackageFiles Include="@(PublishedFiles)">
         <PackagePath>tasks/$(RecursiveDir)</PackagePath>
         <Visible>false</Visible>

@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Timestamp>$([System.DateTime]::Now.ToString("yyyyMMddHHmmss"))</Timestamp>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
@@ -9,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Thorm.Generator.Build" Version="0.0.1-dev2019.10.29T132634" />
+    <PackageReference Include="Thorm.Generator.Build" Version="0.0.1-dev-20210125170029" />
   </ItemGroup>
 
 </Project>
